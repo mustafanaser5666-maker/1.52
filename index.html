@@ -2,53 +2,68 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f766e">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>حاسبة ×1.52</title>
 <style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#0f172a;--card:#1e293b;--fg:#f1f5f9;--mut:#94a3b8;--bd:#334155;--acc:#14b8a6;--res:#0f766e}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f172a;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;color:#f1f5f9;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
-.card{width:100%;max-width:420px;background:#1e293b;border-radius:24px;padding:28px 22px;box-shadow:0 10px 40px #0006}
+body{margin:0;min-height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;color:var(--fg);padding:16px}
+.card{width:100%;max-width:420px;background:var(--card);border-radius:24px;padding:28px 22px;box-shadow:0 10px 40px #0006}
 h1{margin:0 0 4px;font-size:20px;text-align:center}
-.sub{text-align:center;color:#94a3b8;font-size:14px;margin-bottom:22px}
-input{width:100%;font-size:32px;padding:16px;border-radius:16px;border:2px solid #334155;background:#0f172a;color:#fff;text-align:center;outline:none}
-input:focus{border-color:#14b8a6}
-.res{margin-top:22px;background:#0f766e;border-radius:16px;padding:18px;text-align:center}
+.sub{text-align:center;color:var(--mut);font-size:14px;margin-bottom:22px}
+input{width:100%;font-size:32px;padding:16px;border-radius:16px;border:2px solid var(--bd);background:var(--bg);color:#fff;text-align:center;outline:none}
+input:focus{border-color:var(--acc)}
+.res{margin-top:22px;background:var(--res);border-radius:16px;padding:18px;text-align:center;color:#fff}
 .res small{display:block;opacity:.8;font-size:13px}
 .res b{display:block;font-size:36px;margin-top:6px;word-break:break-all;direction:ltr}
-button{margin-top:14px;width:100%;padding:14px;border:0;border-radius:14px;font-size:17px;background:#14b8a6;color:#042f2e;font-weight:700}
-button.g{background:#334155;color:#e2e8f0;margin-top:10px}
+button{margin-top:14px;width:100%;padding:14px;border:0;border-radius:14px;font-size:17px;background:var(--acc);color:#042f2e;font-weight:700}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.pad button{margin:0;padding:16px 0;font-size:26px;background:var(--bd);color:#f1f5f9;font-weight:600;touch-action:manipulation}
+.pad button:active{background:#475569}
+.pad button.op{background:#7f1d1d;color:#fff}
 </style>
 </head>
 <body>
 <div class="card">
 <h1>حاسبة × 1.52</h1>
 <div class="sub">اكتب الرقم وينضرب مباشرة</div>
-<input id="n" type="text" inputmode="decimal" placeholder="0" autofocus>
+<input id="n" type="text" inputmode="none" readonly placeholder="0">
 <div class="res"><small>الناتج</small><b id="r">0</b></div>
+<div class="pad" id="pad"></div>
 <button id="c">نسخ الناتج</button>
-<button class="g" id="x">مسح</button>
 </div>
 <script>
 const n=document.getElementById('n'),r=document.getElementById('r');
 const ar='٠١٢٣٤٥٦٧٨٩';
 let val=0;
 function calc(){
-  let s=n.value.replace(/[٠-٩]/g,d=>ar.indexOf(d)).replace(/[,٬،]/g,'').replace('٫','.');
+  const s=n.value.replace(/[٠-٩]/g,d=>ar.indexOf(d)).replace(/[,٬،]/g,'').replace('٫','.');
   const x=parseFloat(s);
   if(isNaN(x)){val=0;r.textContent='0';return}
   val=Math.round(x*1.52*1e6)/1e6;
   r.textContent=val.toLocaleString('en-US',{maximumFractionDigits:6});
 }
-n.addEventListener('input',calc);
+const keys=['7','8','9','4','5','6','1','2','3','.','0','⌫'];
+const pad=document.getElementById('pad');
+function press(k){
+  if(k==='⌫')n.value=n.value.slice(0,-1);
+  else if(k==='C')n.value='';
+  else if(k==='.'){if(n.value.includes('.'))return;n.value=(n.value||'0')+'.'}
+  else n.value=(n.value==='0'?'':n.value)+k;
+  calc();
+}
+keys.forEach(k=>{const b=document.createElement('button');b.textContent=k;b.onclick=()=>press(k);pad.appendChild(b)});
+const cb=document.createElement('button');cb.textContent='مسح الكل';cb.className='op';cb.style.gridColumn='1 / -1';cb.style.fontSize='18px';cb.onclick=()=>press('C');pad.appendChild(cb);
+document.addEventListener('keydown',e=>{if(/^[0-9.]$/.test(e.key))press(e.key);else if(e.key==='Backspace')press('⌫');else if(e.key==='Escape')press('C')});
 document.getElementById('c').onclick=async e=>{
   try{await navigator.clipboard.writeText(String(val));e.target.textContent='تم النسخ ✓'}catch(_){e.target.textContent='ما اشتغل النسخ'}
   setTimeout(()=>e.target.textContent='نسخ الناتج',1200)
 };
-document.getElementById('x').onclick=()=>{n.value='';calc();n.focus()};
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
