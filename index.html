@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>حاسبة ×1.52</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f172a;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;color:#f1f5f9;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
+.card{width:100%;max-width:420px;background:#1e293b;border-radius:24px;padding:28px 22px;box-shadow:0 10px 40px #0006}
+h1{margin:0 0 4px;font-size:20px;text-align:center}
+.sub{text-align:center;color:#94a3b8;font-size:14px;margin-bottom:22px}
+input{width:100%;font-size:32px;padding:16px;border-radius:16px;border:2px solid #334155;background:#0f172a;color:#fff;text-align:center;outline:none}
+input:focus{border-color:#14b8a6}
+.res{margin-top:22px;background:#0f766e;border-radius:16px;padding:18px;text-align:center}
+.res small{display:block;opacity:.8;font-size:13px}
+.res b{display:block;font-size:36px;margin-top:6px;word-break:break-all;direction:ltr}
+button{margin-top:14px;width:100%;padding:14px;border:0;border-radius:14px;font-size:17px;background:#14b8a6;color:#042f2e;font-weight:700}
+button.g{background:#334155;color:#e2e8f0;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>حاسبة × 1.52</h1>
+<div class="sub">اكتب الرقم وينضرب مباشرة</div>
+<input id="n" type="text" inputmode="decimal" placeholder="0" autofocus>
+<div class="res"><small>الناتج</small><b id="r">0</b></div>
+<button id="c">نسخ الناتج</button>
+<button class="g" id="x">مسح</button>
+</div>
+<script>
+const n=document.getElementById('n'),r=document.getElementById('r');
+const ar='٠١٢٣٤٥٦٧٨٩';
+let val=0;
+function calc(){
+  let s=n.value.replace(/[٠-٩]/g,d=>ar.indexOf(d)).replace(/[,٬،]/g,'').replace('٫','.');
+  const x=parseFloat(s);
+  if(isNaN(x)){val=0;r.textContent='0';return}
+  val=Math.round(x*1.52*1e6)/1e6;
+  r.textContent=val.toLocaleString('en-US',{maximumFractionDigits:6});
+}
+n.addEventListener('input',calc);
+document.getElementById('c').onclick=async e=>{
+  try{await navigator.clipboard.writeText(String(val));e.target.textContent='تم النسخ ✓'}catch(_){e.target.textContent='ما اشتغل النسخ'}
+  setTimeout(()=>e.target.textContent='نسخ الناتج',1200)
+};
+document.getElementById('x').onclick=()=>{n.value='';calc();n.focus()};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
